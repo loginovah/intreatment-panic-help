@@ -7,13 +7,14 @@
 <meta name="description" content="Пошаговая самопомощь при панической атаке: дыхание, короткая игра, аудиоинструкции психолога и шкала тревоги. InTreatment — центр ментального здоровья">
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#161514" media="(prefers-color-scheme: dark)">
-<!-- Превью при пересылке ссылки. og:url и og:image лучше указать абсолютными адресами после публикации -->
+<!-- Адрес страницы и обложка для предпросмотра ссылки в мессенджерах -->
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ru_RU">
 <meta property="og:site_name" content="InTreatment">
 <meta property="og:title" content="Скорая помощь при панической атаке">
 <meta property="og:description" content="Дыхание, короткая игра и голос психолога, который шаг за шагом проводит через приступ">
-<meta property="og:image" content="media/intro.jpg">
+<meta property="og:url" content="https://loginovah.github.io/intreatment-panic-help/">
+<meta property="og:image" content="https://loginovah.github.io/intreatment-panic-help/media/intro.jpg">
 <meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1564,21 +1565,42 @@ document.addEventListener('click', e => { const b = e.target.closest('[data-open
 
 /* ---------- share ---------- */
 (() => {
-  const URL = location.origin + location.pathname;
+  const URL = location.origin + location.pathname.replace(/\/index\.html$/i, '/');
   const TEXT = 'Делюсь бережным инструментом на случай панической атаки: дыхание, короткая игра и голос психолога, который шаг за шагом проводит через приступ. Сохраните — вдруг пригодится';
+  // Share targets can discard the separate URL field. Include the link in
+  // the text itself, without passing a duplicate url field to navigator.share.
+  const MESSAGE = TEXT + '\n\n' + URL;
   const note = $('#sh-note'), enc = encodeURIComponent;
   $('#sh-tg').href = 'https://t.me/share/url?url=' + enc(URL) + '&text=' + enc(TEXT);
-  $('#sh-wa').href = 'https://wa.me/?text=' + enc(TEXT + '\n' + URL);
-  const say = t => { note.textContent = t; clearTimeout(say.t); say.t = setTimeout(() => note.textContent = '', 4000); };
-  const copy = (txt, ok) => {
-    try { navigator.clipboard.writeText(txt).then(() => say(ok), () => say('Ссылка: ' + URL)); }
-    catch (e) { say('Ссылка: ' + URL); }
+  $('#sh-wa').href = 'https://wa.me/?text=' + enc(MESSAGE);
+  const say = t => { note.textContent = t; clearTimeout(say.t); say.t = setTimeout(() => note.textContent = '', 6000); };
+  const copyFallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = MESSAGE;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    let done = false;
+    try { done = document.execCommand('copy'); } catch (e) {}
+    ta.remove();
+    say(done ? 'Текст со ссылкой скопирован — вставьте его в сообщение' : 'Не удалось скопировать автоматически. Ссылка: ' + URL);
+  };
+  const copy = () => {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      navigator.clipboard.writeText(MESSAGE).then(
+        () => say('Текст со ссылкой скопирован — вставьте его в сообщение'),
+        copyFallback
+      );
+    } else copyFallback();
   };
   $('#sh-share').addEventListener('click', () => {
-    if (navigator.share) {
-      navigator.share({ title: 'Скорая помощь при панической атаке', text: TEXT, url: URL })
-        .catch(err => { if (!err || err.name !== 'AbortError') copy(TEXT + '\n' + URL, 'Ссылка скопирована — отправьте ее в любом мессенджере'); });
-    } else copy(TEXT + '\n' + URL, 'Ссылка скопирована — отправьте ее в любом мессенджере');
+    if (typeof navigator.share === 'function') {
+      try {
+        navigator.share({ title: 'Скорая помощь при панической атаке', text: MESSAGE })
+          .catch(err => { if (!err || err.name !== 'AbortError') copy(); });
+      } catch (e) { copy(); }
+    } else copy();
   });
 })();
 
