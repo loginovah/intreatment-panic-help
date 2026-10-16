@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Скорая помощь при панической атаке</title>
 <meta name="description" content="Пошаговая самопомощь при панической атаке: дыхание, короткая игра, аудиоинструкции психолога и шкала тревоги. InTreatment — центр ментального здоровья">
-<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#161514" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="only light">
+<meta name="theme-color" content="#FFFFFF">
 <!-- Адрес страницы и обложка для предпросмотра ссылки в мессенджерах -->
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ru_RU">
@@ -24,6 +24,8 @@
 /* Layout: follows the «Выдох» site — white and cream sections, uppercase Playfair Display headings, Helvetica Neue text,
    dark 12px-radius actions with the ●◌ mark, round video note, dashed route rail, orbit CTA. Full-screen focus mode for the acute state. */
 :root{
+  color-scheme:light; /* fallback for browsers without `only` support */
+  color-scheme:only light; /* keep the original palette; opt out of auto-dark */
   --page:#FAF9F7; --panel:#FFFFFF; --cream:#FAF9F7;
   --ink:#2D2C2A; --ink-strong:#1A1816; --muted:rgba(37,36,35,.68);
   --line:rgba(0,0,0,.1); --input-line:rgba(0,0,0,.12);
@@ -40,36 +42,6 @@
   --f-display:"Playfair Display","Times New Roman",serif;
   --r-control:10px; --r-button:12px;
   --ease:cubic-bezier(.22,1,.36,1); --t:200ms ease;
-}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --page:#1D1C1A; --panel:#161514; --cream:#1D1C1A;
-  --ink:#E8E4DE; --ink-strong:#F3EFE9; --muted:rgba(232,228,222,.68);
-  --line:rgba(255,255,255,.12); --input-line:rgba(255,255,255,.16);
-  --action:#F3EFE9; --action-ink:#161514; --secondary:#272624; --orbit-disc:#2A2927;
-  --accent:#222B2B; --focus:#E8E4DE; --success:#8FC4A3;
-  --care-bg:#2A231E; --care-line:#463A30; --care-ink:#E5C3A6;
-  --mint:#222B2B; --beige:#2A2622; --lilac:#27252D;
-  --data:#E8E4DE; --rail:#5E5C59;
-  --orb:#26302F; --orb-edge:#7D807E;
-  --game-bg:#1D1C1A; --grid:#33312E;
-  --p1:#9FC2C1; --p2:#D3C4AC; --p3:#B5ADD2; --p4:#9BBBA4; --p5:#D9B7A9; --p6:#A19E99; --p7:#C3D8D8;
-  --shadow-soft:0 5px 22px rgb(0 0 0 / 35%); --shadow-raised:0 22px 70px rgb(0 0 0 / 45%);
-  color-scheme:dark;
-}}
-:root[data-theme="dark"]{
-  --page:#1D1C1A; --panel:#161514; --cream:#1D1C1A;
-  --ink:#E8E4DE; --ink-strong:#F3EFE9; --muted:rgba(232,228,222,.68);
-  --line:rgba(255,255,255,.12); --input-line:rgba(255,255,255,.16);
-  --action:#F3EFE9; --action-ink:#161514; --secondary:#272624; --orbit-disc:#2A2927;
-  --accent:#222B2B; --focus:#E8E4DE; --success:#8FC4A3;
-  --care-bg:#2A231E; --care-line:#463A30; --care-ink:#E5C3A6;
-  --mint:#222B2B; --beige:#2A2622; --lilac:#27252D;
-  --data:#E8E4DE; --rail:#5E5C59;
-  --orb:#26302F; --orb-edge:#7D807E;
-  --game-bg:#1D1C1A; --grid:#33312E;
-  --p1:#9FC2C1; --p2:#D3C4AC; --p3:#B5ADD2; --p4:#9BBBA4; --p5:#D9B7A9; --p6:#A19E99; --p7:#C3D8D8;
-  --shadow-soft:0 5px 22px rgb(0 0 0 / 35%); --shadow-raised:0 22px 70px rgb(0 0 0 / 45%);
-  color-scheme:dark;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;scroll-padding-top:84px}
@@ -1448,9 +1420,6 @@ const Game = (() => {
     else if (dy > cell * 2.5 && Math.abs(dy) > Math.abs(dx) * 1.5) drop();
     ps = null;
   });
-  const retheme = () => { readColors(); render(); drawNext(); };
-  try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', retheme); } catch (e) {}
-  new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   window.addEventListener('resize', () => { if (running || started) fit(); });
   $('#g-go').addEventListener('click', () => start());
   return { start, pause, fit, prepare, get started() { return !$('#g-start').hidden ? false : started; }, key(k) { ({ ArrowLeft: () => move(-1), ArrowRight: () => move(1), ArrowUp: rotate, x: rotate, ArrowDown: soft, ' ': drop })[k]?.(); }, get running() { return running; } };
